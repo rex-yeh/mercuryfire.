@@ -2,9 +2,9 @@
   <q-page class="row q-pt-xl">
     <div class="full-width q-px-xl">
       <div class="q-mb-xl">
-        <q-input v-model="tempData.name" label="姓名" />
-        <q-input v-model="tempData.age" label="年齡" />
-        <q-btn color="primary" class="q-mt-md" type="submit">新增</q-btn>
+        <q-input v-model="tempData.name" label="姓名" :rules="nameValidationRules" required />
+        <q-input v-model="tempData.age" label="年齡" :rules="ageValidationRules" required type="number" />
+        <q-btn color="primary" class="q-mt-md" @click="handleUpdate">更新</q-btn>
       </div>
 
       <q-table
@@ -79,7 +79,7 @@
 
 <script setup lang="ts">
 import axios from 'axios';
-import { QTableProps } from 'quasar';
+import { QTableProps, useQuasar } from 'quasar';
 import { ref } from 'vue';
 interface btnType {
   label: string;
@@ -123,6 +123,18 @@ const tempData = ref({
   name: '',
   age: '',
 });
+
+const $q = useQuasar();
+
+const nameValidationRules = [
+  (val) => !!val || '姓名不得為空',
+];
+
+const ageValidationRules = [
+  (val) => !!val || '年齡不得為空',
+  (val) => /^\d+$/.test(val) || '年齡請輸入正整數',
+];
+
 function handleClickOption(btn, data) {
   const fetchData = async () => {
     try {
@@ -162,6 +174,22 @@ function handleClickOption(btn, data) {
         break;
     }
   };
+
+  const handleUpdate = async () => {
+    if (!currentId) {
+      console.error('No data selected for update');
+      return;
+    }
+
+    try {
+      const response = await axios.patch(`https://demo.mercuryfire.com.tw:49110/crudTest/${currentId}`, tempData.value);
+      console.log('Data updated successfully:', response.data);
+      fetchData();
+    } catch (error) {
+      console.error('Error updating data:', error);
+    }
+  };
+
   fetchData();
 
   return {
