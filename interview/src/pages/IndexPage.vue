@@ -4,7 +4,7 @@
       <div class="q-mb-xl">
         <q-input v-model="tempData.name" label="姓名" />
         <q-input v-model="tempData.age" label="年齡" />
-        <q-btn color="primary" class="q-mt-md">新增</q-btn>
+        <q-btn color="primary" class="q-mt-md" type="submit">新增</q-btn>
       </div>
 
       <q-table
@@ -124,7 +124,54 @@ const tempData = ref({
   age: '',
 });
 function handleClickOption(btn, data) {
-  // ...
+  const fetchData = async () => {
+    try {
+      const response = await axios.get('https://demo.mercuryfire.com.tw:49110/crudTest/a');
+      blockData.value = response.data;
+    } catch (error) {
+      console.error('Error fetching data:', error);
+    }
+  };
+
+  const handleSubmit = async () => {
+    try {
+      const response = await axios.post('https://demo.mercuryfire.com.tw:49110/crudTest', tempData.value);
+      console.log('Data added successfully:', response.data);
+      fetchData();
+    } catch (error) {
+      console.error('Error adding data:', error);
+    }
+  };
+
+  const handleClickOption = async (btn, data) => {
+    switch (btn.status) {
+      case 'edit':
+
+        break;
+      case 'delete':
+
+        try {
+          await axios.delete(`https://demo.mercuryfire.com.tw:49110/crudTest/${data.id}`);
+          console.log('Data deleted successfully');
+          fetchData();
+        } catch (error) {
+          console.error('Error deleting data:', error);
+        }
+        break;
+      default:
+        break;
+    }
+  };
+  fetchData();
+
+  return {
+    blockData,
+    tableConfig,
+    tableButtons,
+    tempData,
+    handleSubmit,
+    handleClickOption,
+  };
 }
 </script>
 
